@@ -345,7 +345,7 @@ Q
 
     # For DA instead of AP
     def text_field_default_appearance(element)
-      text_style = element.text_style ||= Prawn::TextStyle(@document,"Helvetica",10,'000000')
+      text_style = element.text_style ||= Prawn::TextStyle(@document,"Helvetica", :normal, 10,'000000')
 
       # Set border width to 0, don't add any borders by default
       element.border_style ||= Prawn::BorderStyle(@document, 0)
