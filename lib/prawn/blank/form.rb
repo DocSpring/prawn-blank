@@ -7,7 +7,9 @@ class Prawn::Blank::Form < Hash
     # See the "Variable Text" section in the PDF reference.
     # We need to set NeedAppearances to true to render filled out text fields, and
     # update the appearances after user input.
-    self[:NeedAppearances] = true
+    # UPDATE: Turn this off, since we are now properly generating initial appearance streams
+    # for checkboxes and text fields, etc.
+    # self[:NeedAppearances] = true
 
     self[:Fields] = []
     zadb_ref = document.ref!(

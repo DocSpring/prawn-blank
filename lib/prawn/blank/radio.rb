@@ -33,9 +33,8 @@ module Prawn::Blank
       @data[:AS] = parent.value == @value ? @value : :Off
 
       if check_string
-        # right now, Adobe is replacing our appearance AP content stream with its own defaults
-        # and uses ZaDB (ZapfDingBats) for its font. Using '4', which corresponds to
-        # checkmark for that font would render the radio button as a checkmark
+        # Chrome and Adobe replace our appearance AP content stream with its own defaults.
+        # and uses ZaDB (ZapfDingBats) for its font.
         @data[:MK] = @data[:MK] || {}
         @data[:MK][:CA] = PDF::Core::LiteralString.new(check_zapf_char)
       end

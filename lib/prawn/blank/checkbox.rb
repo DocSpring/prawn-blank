@@ -39,6 +39,13 @@ class Prawn::Blank::Checkbox < Prawn::Blank::Field
     @data[:AP] = { N: { Off: app.checkbox_off(self), Yes: app.checkbox_on(self) },
                    # R: { Off: app.checkbox_off_over(self), Yes: app.checkbox_on_over(self) },
                    D: { Off: app.checkbox_off_down(self), Yes: app.checkbox_on_down(self) } }
+
+    # Chrome and Adobe replace our appearance AP content stream with its own defaults.
+    # and uses ZaDB (ZapfDingBats) for its font.
+    # @data[:DA] = PDF::Core::LiteralString.new('/ZaDb 0 Tf 0 g')
+    @data[:MK] = @data[:MK] || {}
+    @data[:MK][:CA] = PDF::Core::LiteralString.new(check_zapf_char)
+
     nil
   end
 
