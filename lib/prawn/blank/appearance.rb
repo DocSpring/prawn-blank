@@ -43,7 +43,7 @@ module Prawn::Blank
       raise "Unhandled page rotation for xobject_matrix! #{page_rotation}"
     end
 
-    def render(dict)
+    def render(dict, &block)
       dict = {
         Type: :XObject,
         Subtype: :Form,
@@ -51,9 +51,7 @@ module Prawn::Blank
       }.merge(dict)
 
       result = @document.ref!(dict)
-      @document.state.page.stamp_stream(result) do
-        yield
-      end
+      @document.state.page.stamp_stream(result, &block)
       @document.acroform.add_resources(result.data[:Resources])
       result
     end
@@ -82,14 +80,14 @@ module Prawn::Blank
     alias button_over button
     alias button_down button
 
-    def checkbox_off(element, _cache_key = :checkbox_off, mousedown = false)
+    def checkbox_off(element, _cache_key = :checkbox_off, mousedown: false)
       element.width = 10 if !element.width || (element.width <= 0)
       element.height = 10 if !element.height || (element.height <= 0)
       width = element.width
       height = element.height
       # style = element.style ||= Prawn::ColorStyle(@document, 'ffffff', '888888')
 
-      style = element.style ||= {
+      element.style ||= {
         BC: [0],
         BG: [1]
       }
@@ -120,17 +118,17 @@ s
     alias checkbox_off_over checkbox_off
     # alias checkbox_off_down checkbox_off
     def checkbox_off_down(element)
-      checkbox_off(element, :checkbox_off_down, :down)
+      checkbox_off(element, :checkbox_off_down, mousedown: true)
     end
 
-    def checkbox_on(element, _cache_key = :checkbox_on, mousedown = false)
+    def checkbox_on(element, _cache_key = :checkbox_on, mousedown: false)
       element.width = 10 if !element.width || (element.width <= 0)
       element.height = 10 if !element.height || (element.height <= 0)
       width = element.width
       height = element.height
       # style = element.style ||= Prawn::ColorStyle(@document, 'ffffff', '888888')
       # border_style = element.border_style ||= Prawn::BorderStyle(@document, 4)
-      style = element.style ||= {
+      element.style ||= {
         BC: [0],
         BG: [1]
       }
@@ -209,10 +207,10 @@ Q
     alias checkbox_on_over checkbox_on
     # alias checkbox_on_down checkbox_on
     def checkbox_on_down(element)
-      checkbox_on(element, :checkbox_on_down, :down)
+      checkbox_on(element, :checkbox_on_down, mousedown: true)
     end
 
-    def radio_off(element, cache_key = :radio_off, mousedown = false)
+    def radio_off(element, cache_key = :radio_off, mousedown: false)
       element.width = 10 if !element.width || (element.width <= 0)
       element.height = 10 if !element.height || (element.height <= 0)
       width = element.width
@@ -273,10 +271,10 @@ Q
     alias radio_off_over radio_off
     # alias radio_off_down radio_off
     def radio_off_down(element)
-      radio_off(element, :radio_off_down, :down)
+      radio_off(element, :radio_off_down, mousedown: true)
     end
 
-    def radio_on(element, _cache_key = :radio_on, mousedown = false)
+    def radio_on(element, _cache_key = :radio_on, mousedown: false)
       element.width = 10 if !element.width || (element.width <= 0)
       element.height = 10 if !element.height || (element.height <= 0)
       width = element.width
@@ -340,32 +338,30 @@ Q
     alias radio_on_over radio_on
     # alias radio_on_down radio_on
     def radio_on_down(element)
-      radio_on(element, :radio_on_down, :down)
+      radio_on(element, :radio_on_down, mousedown: true)
     end
 
     # For DA instead of AP
     def text_field_default_appearance(element)
-      text_style = element.text_style ||= Prawn::TextStyle(@document,"Helvetica",10,'000000')
+      text_style = element.text_style ||= Prawn::TextStyle(@document, 'Helvetica', 10, '000000')
 
       # Set border width to 0, don't add any borders by default
       element.border_style ||= Prawn::BorderStyle(@document, 0)
 
-      if !element.width or element.width <= 0
-        element.width = 100
-      end
-      if !element.height or element.height <= 0
+      element.width = 100 if !element.width || (element.width <= 0)
+      if !element.height || (element.height <= 0)
         element.height = text_style.size + 6 # + 2 * border_style[:W]
       end
       width = element.width
       height = element.height
-      style = element.style || Prawn::ColorStyle(@document,'ffffff','000000')
+      style = element.style || Prawn::ColorStyle(@document, 'ffffff', '000000')
       multiline = element.multiline
       value = element.value
 
       font_ref = document.state.page.fonts[text_style.font_identifier]
 
       descent_ratio = 0.23
-      vertical_offset = text_style.size * descent_ratio + 1.25
+      vertical_offset = (text_style.size * descent_ratio) + 1.25
 
       if value.blank? || value.ascii_only?
         return cached(
@@ -389,66 +385,64 @@ Q
           render(
             BBox: [0, 0, width, height],
             FormType: 1,
-            Matrix: xobject_matrix(width, height),
+            Matrix: xobject_matrix(width, height)
           ) do
             document.add_content '/Tx BMC'
             document.canvas do
               document.save_font do
                 document.transparent(element.text_box_opacity || 1) do
-                    document.stroke_color( *denormalize_color(style[:BC]) )
-                    document.fill_color( *denormalize_color(style[:BG]) )
+                  document.stroke_color(*denormalize_color(style[:BC]))
+                  document.fill_color(*denormalize_color(style[:BG]))
 
-                    # render background
-                    if element.text_box_background_color.present?
-                      document.fill_color(element.text_box_background_color)
-                      document.fill_rectangle( [0, height], width, height)
-                    end
+                  # render background
+                  if element.text_box_background_color.present?
+                    document.fill_color(element.text_box_background_color)
+                    document.fill_rectangle([0, height], width, height)
+                  end
 
-                    # document.line_width(border_style[:W])
-                    # bw = border_style[:W]/2.0
+                  # document.line_width(border_style[:W])
+                  # bw = border_style[:W]/2.0
 
-                    next unless value.present?
+                  next unless value.present?
 
-                    if text_style
-                      document.font(text_style.font, size: text_style.size, style: text_style.style )
-                      document.stroke_color( *text_style.color )
-                      document.fill_color( *text_style.color )
-                    end
+                  if text_style
+                    document.font(text_style.font, size: text_style.size, style: text_style.style)
+                    document.stroke_color(*text_style.color)
+                    document.fill_color(*text_style.color)
+                  end
 
-                    # document.draw_text(value, at: [0, [0, height - document.font_size - 1.5].max ] )
+                  # document.draw_text(value, at: [0, [0, height - document.font_size - 1.5].max ] )
 
-                    # text_offset_y = [height - document.font_size - 1.5].max
+                  # text_offset_y = [height - document.font_size - 1.5].max
 
-                    text_box_args = {
-                      # at: [0, text_offset_y],
-                      at: [0, height],
-                      width: width,
-                      height: height,
-                      align: element.text_box_align,
-                      valign: element.text_box_valign,
-                      overflow: element.text_box_overflow,
-                      min_font_size: 5,
-                      single_line: element.multiline == 0,
-                      character_spacing: element.text_box_character_spacing,
-                      direction: element.text_box_text_direction,
-                    }
+                  text_box_args = {
+                    # at: [0, text_offset_y],
+                    at: [0, height],
+                    width: width,
+                    height: height,
+                    align: element.text_box_align,
+                    valign: element.text_box_valign,
+                    overflow: element.text_box_overflow,
+                    min_font_size: 5,
+                    single_line: element.multiline == 0,
+                    character_spacing: element.text_box_character_spacing,
+                    direction: element.text_box_text_direction
+                  }
 
-                    text_options = { text: value }
+                  text_options = { text: value }
 
-                    if element.text_box_strikethrough
-                      text_options[:styles] = [:strikethrough]
-                    end
+                  text_options[:styles] = [:strikethrough] if element.text_box_strikethrough
 
-                    formatted_text_array = [text_options]
+                  formatted_text_array = [text_options]
 
-                    begin
-                      document.formatted_text_box(
-                        formatted_text_array,
-                        text_box_args
-                      )
-                    rescue Prawn::Errors::CannotFit
-                      document.draw_text value, at: [0, height], direction: element.text_box_text_direction
-                    end
+                  begin
+                    document.formatted_text_box(
+                      formatted_text_array,
+                      text_box_args
+                    )
+                  rescue Prawn::Errors::CannotFit
+                    document.draw_text value, at: [0, height], direction: element.text_box_text_direction
+                  end
                 end
               end
             end
@@ -483,7 +477,7 @@ q
 W
 n
 BT
-#{text_style.to_s}
+#{text_style}
 2 #{vertical_offset} Td
 (#{value}) Tj
 ET
@@ -491,7 +485,6 @@ Q
 EMC
       )
       stream_ref
-
     end
 
     protected
@@ -502,11 +495,12 @@ EMC
 
     def denormalize_color(color)
       s = color.size
-      if s == 1 # gray
+      case s
+      when 1 # gray
         return [0, 0, 0, color[0]]
-      elsif s == 3 # rgb
+      when 3 # rgb
         return Prawn::Graphics::Color.rgb2hex(color.map { |component| component * 255.0 })
-      elsif s == 4 # cmyk
+      when 4 # cmyk
         return color.map { |component| component * 100.0 }
       end
 

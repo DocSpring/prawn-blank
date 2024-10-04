@@ -91,12 +91,7 @@ module Prawn
 
       page_rotation = get_page_rotation(page)
 
-      if [90, 270].include?(page_rotation)
-        swap_width = page_width
-
-        page_width  = page_height
-        page_height = swap_width
-      end
+      page_width, page_height = page_height, page_width if [90, 270].include?(page_rotation)
 
       [page_width, page_height]
     end

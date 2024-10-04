@@ -1,5 +1,6 @@
 AllCops:
-  TargetRubyVersion: 2.3
+  TargetRubyVersion: 3
+  NewCops: enable
 
 Naming/FileName:
   Enabled: false
@@ -17,6 +18,9 @@ Layout/LineLength:
   Max: 120
 
 Metrics/MethodLength:
+  Enabled: false
+
+Metrics/ModuleLength:
   Enabled: false
 
 Metrics/AbcSize:

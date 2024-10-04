@@ -29,62 +29,102 @@ class Prawn::Blank::FieldBase < PDF::Core::Reference
   }.freeze
 
   class << self
-    def field_attr_accessor(name, key, inheritable = true)
-      class_eval <<EVAL
-      def #{name}
-        if #{inheritable.inspect} and !@data.key?(#{key.to_sym.inspect}) and self.parent?
-          return self.parent.#{name}
-        end
-        @data[#{key.to_sym.inspect}]
-      end
-      def #{name}=(value)
-        @data[#{key.to_sym.inspect}]=value
-      end
-      def delete_#{name}
-        @data.delete #{key.to_sym.inspect}
-      end
-      def #{name}?
-        if #{inheritable.inspect}
-          @data.key?(#{key.to_sym.inspect}) or ( self.parent? and self.parent.#{name}?)
-        else
-          @data.key? #{key.to_sym.inspect}
-        end
-      end
-      def own_#{name}?
-        @data.key? #{key.to_sym.inspect}
-      end
-EVAL
+    def field_attr_accessor(name, key, inheritable: true)
+      class_eval(
+        # def rect
+        #   if false && !@data.key?(:Rect) && self.parent?
+        #     return self.parent.rect
+        #   end
+        #   @data[:Rect]
+        # end
+        # def rect=(value)
+        #   @data[:Rect]=value
+        # end
+        # def delete_rect
+        #   @data.delete :Rect
+        # end
+        # def rect?
+        #   if false
+        #     @data.key?(:Rect) || (self.parent? && self.parent.rect?)
+        #   else
+        #     @data.key? :Rect
+        #   end
+        # end
+        # def own_rect?
+        #   @data.key? :Rect
+        # end
+        <<~EVAL, __FILE__, __LINE__ + 1
+          def #{name}
+            if #{inheritable.inspect} && !@data.key?(#{key.to_sym.inspect}) && self.parent?
+              return self.parent.#{name}
+            end
+            @data[#{key.to_sym.inspect}]
+          end
+
+          def #{name}=(value)
+            @data[#{key.to_sym.inspect}]=value
+          end
+          def delete_#{name}
+            @data.delete #{key.to_sym.inspect}
+          end
+          def #{name}?
+            if #{inheritable.inspect}
+              @data.key?(#{key.to_sym.inspect}) || (self.parent? && self.parent.#{name}?)
+            else
+              @data.key? #{key.to_sym.inspect}
+            end
+          end
+          def own_#{name}?
+            @data.key? #{key.to_sym.inspect}
+          end
+        EVAL
+      )
     end
 
     def flag_accessor(name, bit, flag_name = 'flags')
       mask = (1 << (bit - 1))
 
-      class_eval <<EVAL
-      def #{name}
-        (self.#{flag_name} || 0) & #{mask.inspect}
-      end
+      class_eval(
+        # def invisible
+        #   (self.aflags || 0) & 1
+        # end
+        #
+        # alias invisible? invisible
+        #
+        # def invisible=(value)
+        #   if value
+        #     self.aflags = (self.aflags || 0) | 1
+        #   else
+        #     self.aflags = (self.aflags || 0) & ~1
+        #   end
+        # end
+        <<~EVAL, __FILE__, __LINE__ + 1
+          def #{name}
+            (self.#{flag_name} || 0) & #{mask.inspect}
+          end
 
-      alias #{name}? #{name}
+          alias #{name}? #{name}
 
-      def #{name}=(value)
-        if value
-          self.#{flag_name} = (self.#{flag_name} || 0) | #{mask.inspect}
-        else
-          self.#{flag_name} = (self.#{flag_name} || 0) & ~#{mask.inspect}
-        end
-      end
-EVAL
+          def #{name}=(value)
+            if value
+              self.#{flag_name} = (self.#{flag_name} || 0) | #{mask.inspect}
+            else
+              self.#{flag_name} = (self.#{flag_name} || 0) & ~#{mask.inspect}
+            end
+          end
+        EVAL
+      )
     end
   end
 
-  field_attr_accessor :rect, :Rect, false
-  field_attr_accessor :parent, :Parent, false
-  field_attr_accessor :children, :Kids, false
+  field_attr_accessor :rect, :Rect, inheritable: false
+  field_attr_accessor :parent, :Parent, inheritable: false
+  field_attr_accessor :children, :Kids, inheritable: false
   field_attr_accessor :type, :FT
   field_attr_accessor :aflags, :F
   field_attr_accessor :flags, :Ff
-  field_attr_accessor :name, :T, false
-  field_attr_accessor :fullname, :TU, false
+  field_attr_accessor :name, :T, inheritable: false
+  field_attr_accessor :fullname, :TU, inheritable: false
   field_attr_accessor :value, :V
   field_attr_accessor :default_value, :DV
   field_attr_accessor :default_appearance, :DA
@@ -96,18 +136,18 @@ EVAL
   field_attr_accessor :options, :Opt
   field_attr_accessor :max_length, :MaxLen
 
-  attr_reader :text_style
-  attr_reader :shrink_to_fit
+  attr_reader :text_style,
+              :shrink_to_fit
 
-  attr_accessor :text_box_opacity
-  attr_accessor :text_box_background_color
-  attr_accessor :text_box_align
-  attr_accessor :text_box_valign
-  attr_accessor :text_box_overflow
-  attr_accessor :text_box_single_line
-  attr_accessor :text_box_character_spacing
-  attr_accessor :text_box_text_direction
-  attr_accessor :text_box_strikethrough
+  attr_accessor :text_box_opacity,
+                :text_box_background_color,
+                :text_box_align,
+                :text_box_valign,
+                :text_box_overflow,
+                :text_box_single_line,
+                :text_box_character_spacing,
+                :text_box_text_direction,
+                :text_box_strikethrough
 
   # Special case for text_style / default_appearance
   # When shrink_to_fit is true, the default_appearance font size is set to 0
@@ -180,8 +220,8 @@ EVAL
     !parent?
   end
 
-  def self.create(document, *args, &block)
-    document.state.store.push(new(document.state.store.size + 1, *args, &block))
+  def self.create(document, ...)
+    document.state.store.push(new(document.state.store.size + 1, ...))
   end
 
   def self.from_ref(ref)
@@ -198,7 +238,7 @@ EVAL
 
     options = (args.last.is_a?(Hash) ? args.pop : {})
     options.each do |k, v|
-      send "#{k}=".to_sym, v
+      send :"#{k}=", v
     end
 
     yield self if block_given?
@@ -235,20 +275,19 @@ EVAL
     raise 'Blank: Type must be :Annot ' if data[:Type] != :Annot
     raise 'Blank: Subtype must be :Annot ' if data[:Subtype] != :Widget
 
-    if leaf?
-      raise 'Blank: FT ( Field Type ) must be :Btn, :Tx, :Ch or :Sig ' unless %i[Btn Tx Ch Sig].include type
-    end
+    raise 'Blank: FT ( Field Type ) must be :Btn, :Tx, :Ch or :Sig ' if leaf? && !(%i[Btn Tx Ch Sig].include type)
   end
 
   def finalize(document); end
 
   def denormalize_color(color)
     s = color.size
-    if s == 1 # gray
+    case s
+    when 1 # gray
       return [0, 0, 0, color[0]]
-    elsif s == 3 # rgb
+    when 3 # rgb
       return Prawn::Graphics::Color.rgb2hex(color.map { |component| component * 255.0 })
-    elsif s == 4 # cmyk
+    when 4 # cmyk
       return color.map { |component| component * 100.0 }
     end
 

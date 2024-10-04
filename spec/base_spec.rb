@@ -3,6 +3,6 @@
 require 'helper'
 describe Prawn::Blank do
   it 'should run tests!' do
-    true.should_not == false
+    expect(true).to_not eq false
   end
 end
