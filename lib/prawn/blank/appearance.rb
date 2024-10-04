@@ -179,7 +179,8 @@ s
       # x y m: Begin a new subpath by moving the current point to coordinates (x, y)
       # x1 y1 x2 y2 x3 y3 c: Append a cubic Bézier curve to the current path
       # x y l: Append a straight line segment from the current point to the point (x, y)
-      # h: Close the current subpath by appending a straight line segment from the current point to the starting point of the subpath.
+      # h: Close the current subpath by appending a straight line segment from the
+      #    current point to the starting point of the subpath.
 
       stream_ref.stream << %(
 #{bg_color} g
@@ -403,7 +404,7 @@ Q
                   # document.line_width(border_style[:W])
                   # bw = border_style[:W]/2.0
 
-                  next unless value.present?
+                  next if value.blank?
 
                   if text_style
                     document.font(text_style.font, size: text_style.size, style: text_style.style)

@@ -24,6 +24,6 @@ Spec::Rake::SpecTask.new('spec') do |t|
 end
 
 desc 'Look for TODO and FIXME tags in the code'
-task :todo do
+task todo: :environment do
   egrep(/(FIXME|TODO|TBD)/)
 end
