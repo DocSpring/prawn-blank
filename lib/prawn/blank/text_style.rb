@@ -32,9 +32,9 @@ module Prawn::Blank
 
     def color_cmd(color)
       if color[0].is_a? String
-        "rg"
+        'rg'
       else
-        "k"
+        'k'
       end
     end
   end

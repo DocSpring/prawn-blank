@@ -1,5 +1,8 @@
+require: rubocop-rspec
+
 AllCops:
-  TargetRubyVersion: 2.3
+  TargetRubyVersion: 3.0
+  NewCops: enable
 
 Naming/FileName:
   Enabled: false
@@ -13,10 +16,13 @@ Naming/AccessorMethodName:
 Style/ClassAndModuleChildren:
   Enabled: false
 
-Metrics/LineLength:
+Layout/LineLength:
   Max: 120
 
 Metrics/MethodLength:
+  Enabled: false
+
+Metrics/ModuleLength:
   Enabled: false
 
 Metrics/AbcSize:
@@ -46,7 +52,7 @@ Style/Documentation:
 Style/GuardClause:
   Enabled: false
 
-Naming/UncommunicativeMethodParamName:
+Naming/MethodParameterName:
   Enabled: false
 
 Style/EvalWithLocation:

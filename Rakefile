@@ -19,15 +19,11 @@ end
 gem 'hoe', '>=2.0.0'
 require 'hoe'
 
-require 'spec/version'
-require 'spec/rake/spectask'
-require 'spec/ruby'
-
 Spec::Rake::SpecTask.new('spec') do |t|
   t.spec_files = FileList['spec/**/*.rb']
 end
 
 desc 'Look for TODO and FIXME tags in the code'
-task :todo do
+task todo: :environment do
   egrep(/(FIXME|TODO|TBD)/)
 end
