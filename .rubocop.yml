@@ -13,7 +13,7 @@ Naming/AccessorMethodName:
 Style/ClassAndModuleChildren:
   Enabled: false
 
-Metrics/LineLength:
+Layout/LineLength:
   Max: 120
 
 Metrics/MethodLength:
@@ -46,7 +46,7 @@ Style/Documentation:
 Style/GuardClause:
   Enabled: false
 
-Naming/UncommunicativeMethodParamName:
+Naming/MethodParameterName:
   Enabled: false
 
 Style/EvalWithLocation:
